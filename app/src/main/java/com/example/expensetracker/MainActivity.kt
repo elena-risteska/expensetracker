@@ -1,20 +1,25 @@
 package com.example.expensetracker
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.view.Menu
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.core.graphics.toColorInt
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var fragmentContainer: FrameLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Main container layout
+        // Root layout
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
@@ -23,8 +28,8 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        // FrameLayout to host fragments
-        val fragmentContainer = FrameLayout(this).apply {
+        // Fragment container (center of screen)
+        fragmentContainer = FrameLayout(this).apply {
             id = View.generateViewId()
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -33,48 +38,64 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        // BottomNavigationView
-        val bottomNav = BottomNavigationView(this).apply {
+        rootLayout.addView(fragmentContainer)
+
+        // Bottom Navigation
+        val bottomNav = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(16, 16, 16, 32)
+            setBackgroundColor(Color.WHITE)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-
-            setBackgroundColor("#FFF176".toColorInt()) // Yellow background
-            itemIconTintList = null // Use original icon colors if you have custom drawables
-
-            menu.add(Menu.NONE, 1, Menu.NONE, "Expenses")
-                .setIcon(android.R.drawable.ic_menu_view)
-            menu.add(Menu.NONE, 2, Menu.NONE, "Income")
-                .setIcon(android.R.drawable.ic_menu_add)
         }
 
-        // Add views to root
-        rootLayout.addView(fragmentContainer)
-        rootLayout.addView(bottomNav)
+        fun navButton(text: String, onClick: () -> Unit): Button {
+            return Button(this).apply {
+                this.text = text
+                textSize = 14f
+                setTextColor(Color.WHITE)
+                background = GradientDrawable().apply {
+                    cornerRadius = 48f
+                    setColor("#7B1FA2".toColorInt()) // Purple
+                }
+                val params = LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f)
+                params.setMargins(12, 0, 12, 0)
+                layoutParams = params
+                setOnClickListener { onClick() }
+            }
+        }
 
+        val dashboardBtn = navButton("Dashboard") {
+            supportFragmentManager.beginTransaction()
+                .replace(fragmentContainer.id, DashboardFragment())
+                .commit()
+        }
+
+        val expensesBtn = navButton("Expenses") {
+            supportFragmentManager.beginTransaction()
+                .replace(fragmentContainer.id, ExpenseFragment())
+                .commit()
+        }
+
+        val incomeBtn = navButton("Income") {
+            supportFragmentManager.beginTransaction()
+                .replace(fragmentContainer.id, IncomeFragment())
+                .commit()
+        }
+
+        bottomNav.addView(dashboardBtn)
+        bottomNav.addView(expensesBtn)
+        bottomNav.addView(incomeBtn)
+
+        rootLayout.addView(bottomNav)
         setContentView(rootLayout)
 
-        // Load default fragment
+        // Set default screen
         supportFragmentManager.beginTransaction()
-            .replace(fragmentContainer.id, ExpenseFragment())
+            .replace(fragmentContainer.id, DashboardFragment())
             .commit()
-
-        // Handle nav item clicks
-        bottomNav.setOnItemSelectedListener { item ->
-            val selectedFragment = when (item.itemId) {
-                1 -> ExpenseFragment()
-                2 -> IncomeFragment()
-                else -> null
-            }
-
-            selectedFragment?.let {
-                supportFragmentManager.beginTransaction()
-                    .replace(fragmentContainer.id, it)
-                    .commit()
-            }
-
-            true
-        }
     }
 }

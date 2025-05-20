@@ -1,168 +1,87 @@
 package com.example.expensetracker
 
-//noinspection SuspiciousImport
-import android.R
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Color
-import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.InputType
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.core.graphics.toColorInt
+import androidx.lifecycle.ViewModelProvider
 
 class ExpenseFragment : Fragment() {
 
-    private lateinit var expenseListLayout: LinearLayout
+    private lateinit var viewModel: TransactionViewModel
+    private lateinit var layout: LinearLayout
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val context = requireContext()
-
-        val rootLayout = FrameLayout(context).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
+    @SuppressLint("SetTextI18n")
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        layout = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 32, 32, 32)
             setBackgroundColor(Color.WHITE)
         }
 
-        // ScrollView to hold list
-        val scrollView = ScrollView(context).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
+        viewModel = ViewModelProvider(this)[TransactionViewModel::class.java]
+
+        val addBtn = Button(requireContext()).apply {
+            text = "Add Expense"
+            setOnClickListener { showAddDialog() }
         }
 
-        expenseListLayout = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(32, 32, 32, 160)
+        layout.addView(addBtn)
+
+        viewModel.getTransactions("expense").observe(viewLifecycleOwner) { expenses ->
+            refreshList(expenses)
         }
 
-        scrollView.addView(expenseListLayout)
-        rootLayout.addView(scrollView)
-
-        // Add Floating Action Button
-        val fab = Button(context).apply {
-            text = "+"
-            textSize = 28f
-            setTextColor(Color.WHITE)
-            setBackgroundColor("#7B1FA2".toColorInt()) // Purple
-            setPadding(32, 16, 32, 16)
-            background = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor("#7B1FA2".toColorInt())
-            }
-
-            val params = FrameLayout.LayoutParams(180, 180).apply {
-                gravity = Gravity.BOTTOM or Gravity.END
-                marginEnd = 48
-                bottomMargin = 48
-            }
-
-            layoutParams = params
-
-            setOnClickListener {
-                showAddExpenseDialog()
-            }
-        }
-
-        rootLayout.addView(fab)
-
-        return rootLayout
+        return layout
     }
 
-    private fun showAddExpenseDialog() {
+    private fun showAddDialog() {
         val context = requireContext()
-
-        val dialogLayout = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(64, 32, 64, 32)
-        }
-
-        val titleInput = EditText(context).apply {
-            hint = "Title"
-        }
-
-        val amountInput = EditText(context).apply {
+        val input = EditText(context).apply {
             hint = "Amount"
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         }
 
-        val categories = arrayOf("Food", "Transport", "Rent", "Other")
-        val categoryDropdown = Spinner(context).apply {
-            adapter = ArrayAdapter(context, R.layout.simple_spinner_dropdown_item, categories)
-        }
-
-        dialogLayout.addView(titleInput)
-        dialogLayout.addView(amountInput)
-        dialogLayout.addView(categoryDropdown)
-
         AlertDialog.Builder(context)
-            .setTitle("Add Expense")
-            .setView(dialogLayout)
+            .setTitle("New Expense")
+            .setView(input)
             .setPositiveButton("Add") { _, _ ->
-                val title = titleInput.text.toString()
-                val amount = amountInput.text.toString()
-                val category = categoryDropdown.selectedItem.toString()
-
-                addExpenseView(title, amount, category)
+                val amount = input.text.toString().toDoubleOrNull()
+                if (amount != null) {
+                    viewModel.insert(
+                        TransactionEntity(
+                            amount = amount,
+                            category = "Other",
+                            type = "expense"
+                        )
+                    )
+                }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
     @SuppressLint("SetTextI18n")
-    private fun addExpenseView(title: String, amount: String, category: String) {
-        val context = requireContext()
+    private fun refreshList(expenses: List<TransactionEntity>) {
+        // Clear all but first button
+        layout.removeViews(1, layout.childCount - 1)
 
-        val card = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 32, 48, 32)
-            setBackgroundColor("#FFF9C4".toColorInt()) // Light yellow
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                bottomMargin = 24
+        expenses.forEach {
+            val item = TextView(requireContext()).apply {
+                text = "- ${it.amount} ден. (${it.category})"
+                setTextColor(Color.RED)
+                textSize = 16f
             }
-            background = GradientDrawable().apply {
-                cornerRadius = 32f
-                setColor("#FFF9C4".toColorInt())
-            }
+            layout.addView(item)
         }
-
-        val titleText = TextView(context).apply {
-            text = "$title (${category})"
-            textSize = 18f
-            setTypeface(null, Typeface.BOLD)
-        }
-
-        val amountText = TextView(context).apply {
-            text = "- $amount ден."
-            setTextColor(Color.RED)
-            textSize = 16f
-        }
-
-        card.addView(titleText)
-        card.addView(amountText)
-
-        expenseListLayout.addView(card, 0)
     }
 }
