@@ -18,4 +18,9 @@ class TransactionRepository(context: Context) {
     suspend fun insert(transaction: TransactionEntity) {
         transactionDao.insert(transaction)
     }
+
+    suspend fun delete(transaction: TransactionEntity) {
+        transactionDao.delete(transaction)
+    }
+
 }

@@ -21,4 +21,11 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
     fun insert(transaction: TransactionEntity) = viewModelScope.launch {
         repository.insert(transaction)
     }
+
+    fun delete(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            repository.delete(transaction)
+        }
+    }
+
 }
