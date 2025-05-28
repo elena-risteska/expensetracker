@@ -1,6 +1,7 @@
 package com.example.expensetracker
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -23,7 +24,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter
 class DashboardFragment : Fragment() {
 
     private lateinit var viewModel: TransactionViewModel
-    private lateinit var layout: LinearLayout
+
     private lateinit var incomeText: TextView
     private lateinit var expenseText: TextView
     private lateinit var balanceText: TextView
@@ -37,40 +38,188 @@ class DashboardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        layout = LinearLayout(requireContext()).apply {
+        val isTablet = resources.configuration.smallestScreenWidthDp >= 600
+        val orientation = resources.configuration.orientation
+        val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        return when {
+            isTablet && isLandscape -> buildTabletLandscapeLayout()
+            isTablet && !isLandscape -> buildTabletPortraitLayout()
+            !isTablet && isLandscape -> buildPhoneLandscapeLayout()
+            else -> buildPhonePortraitLayout()
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun buildPhonePortraitLayout(): View {
+        val context = requireContext()
+        val root = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor("#FFF176".toColorInt()) // Yellow background
-            setPadding(48, 48, 48, 48)
+            setBackgroundColor("#FFF176".toColorInt())
+            setPadding(32, 32, 32, 32)
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         }
 
-        val bubbleColor = "#9C27B0" // Purple
+        incomeText = createRoundedBubbleTextView("#9C27B0")
+        expenseText = createRoundedBubbleTextView("#9C27B0")
+        balanceText = createRoundedBubbleTextView("#9C27B0")
 
-        incomeText = createRoundedBubbleTextView(bubbleColor)
-        expenseText = createRoundedBubbleTextView(bubbleColor)
-        balanceText = createRoundedBubbleTextView(bubbleColor)
+        root.addView(incomeText)
+        root.addView(expenseText)
+        root.addView(balanceText)
 
-        layout.addView(incomeText)
-        layout.addView(expenseText)
-        layout.addView(balanceText)
-
-        // Add spacer view that expands to push chart down
-        val spacer = View(requireContext()).apply {
+        // Spacer to push pie chart down
+        val spacer = View(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 0,
-                1f // weight 1 fills available space
+                1f
             )
         }
-        layout.addView(spacer)
+        root.addView(spacer)
 
-        pieChart = PieChart(requireContext()).apply {
+        pieChart = createPieChart(ViewGroup.LayoutParams.MATCH_PARENT).apply {
+            layoutParams.height = 800 // taller pie chart
+        }
+        root.addView(pieChart)
+
+        setupViewModel()
+
+        return root
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun buildPhoneLandscapeLayout(): View {
+        val context = requireContext()
+        val root = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor("#FFF176".toColorInt())
+            setPadding(32, 32, 32, 32)
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+
+        val leftColumn = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+        }
+
+        incomeText = createRoundedBubbleTextView("#9C27B0")
+        expenseText = createRoundedBubbleTextView("#9C27B0")
+        balanceText = createRoundedBubbleTextView("#9C27B0")
+
+        leftColumn.addView(incomeText)
+        leftColumn.addView(expenseText)
+        leftColumn.addView(balanceText)
+
+        pieChart = createPieChart(ViewGroup.LayoutParams.MATCH_PARENT)
+        pieChart.layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+
+        root.addView(leftColumn)
+        root.addView(pieChart)
+
+        setupViewModel()
+
+        return root
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun buildTabletPortraitLayout(): View {
+        val context = requireContext()
+        val root = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor("#FFF176".toColorInt())
+            setPadding(64, 64, 64, 64)
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+
+        incomeText = createRoundedBubbleTextView("#7B1FA2")
+        expenseText = createRoundedBubbleTextView("#7B1FA2")
+        balanceText = createRoundedBubbleTextView("#7B1FA2")
+
+        incomeText.textSize = 24f
+        expenseText.textSize = 24f
+        balanceText.textSize = 24f
+
+        root.addView(incomeText)
+        root.addView(expenseText)
+        root.addView(balanceText)
+
+        // Spacer to push pie chart down
+        val spacer = View(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                700
+                0,
+                1f
+            )
+        }
+        root.addView(spacer)
+
+        pieChart = createPieChart(ViewGroup.LayoutParams.MATCH_PARENT).apply {
+            layoutParams.height = 900 // bigger height for tablet
+        }
+        root.addView(pieChart)
+
+        setupViewModel()
+
+        return root
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun buildTabletLandscapeLayout(): View {
+        val context = requireContext()
+        val root = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor("#FFF176".toColorInt())
+            setPadding(64, 64, 64, 64)
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+
+        val leftColumn = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 3f)
+        }
+
+        incomeText = createRoundedBubbleTextView("#7B1FA2")
+        expenseText = createRoundedBubbleTextView("#7B1FA2")
+        balanceText = createRoundedBubbleTextView("#7B1FA2")
+
+        incomeText.textSize = 26f
+        expenseText.textSize = 26f
+        balanceText.textSize = 26f
+
+        leftColumn.addView(incomeText)
+        leftColumn.addView(expenseText)
+        leftColumn.addView(balanceText)
+
+        pieChart = createPieChart(ViewGroup.LayoutParams.MATCH_PARENT)
+        pieChart.layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 7f)
+
+        root.addView(leftColumn)
+        root.addView(pieChart)
+
+        setupViewModel()
+
+        return root
+    }
+
+
+    private fun createPieChart(height: Int): PieChart {
+        return PieChart(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                height
             )
             setUsePercentValues(true)
             description.isEnabled = false
@@ -83,9 +232,9 @@ class DashboardFragment : Fragment() {
             legend.horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
             legend.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
         }
+    }
 
-        layout.addView(pieChart) // Now pie chart will be pushed down
-
+    private fun setupViewModel() {
         viewModel = ViewModelProvider(this)[TransactionViewModel::class.java]
         viewModel.getTotalAmount("income").observe(viewLifecycleOwner) { income ->
             updateDashboard(income ?: 0.0, null)
@@ -93,10 +242,7 @@ class DashboardFragment : Fragment() {
         viewModel.getTotalAmount("expense").observe(viewLifecycleOwner) { expense ->
             updateDashboard(null, expense ?: 0.0)
         }
-
-        return layout
     }
-
 
     @SuppressLint("SetTextI18n")
     private fun updateDashboard(income: Double?, expense: Double?) {
@@ -159,7 +305,7 @@ class DashboardFragment : Fragment() {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin = 40
-                bottomMargin= 40
+                bottomMargin = 40
             }
         }
     }

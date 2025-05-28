@@ -2,6 +2,7 @@ package com.example.expensetracker
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -28,19 +29,20 @@ class IncomeFragment : Fragment() {
     private lateinit var viewModel: TransactionViewModel
     private lateinit var adapter: TransactionAdapter
 
-    private val green = "#388E3C".toColorInt()
+    private val purple = "#9C27B0".toColorInt()
     private val white = Color.WHITE
     private val yellow = "#FFF176".toColorInt()
 
     @SuppressLint("SetTextI18n")
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val root = FrameLayout(requireContext()).apply {
+    private fun buildPhonePortraitLayout(): View {
+        val context = requireContext()
+        val root = FrameLayout(context).apply {
             setBackgroundColor(yellow)
-            setPadding(0, 32, 0, 0)  // Push list down a bit
+            setPadding(0, 32, 0, 0)
         }
 
-        val recyclerView = RecyclerView(requireContext()).apply {
-            layoutManager = LinearLayoutManager(requireContext())
+        val recyclerView = RecyclerView(context).apply {
+            layoutManager = LinearLayoutManager(context)
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
@@ -54,13 +56,13 @@ class IncomeFragment : Fragment() {
         }
         recyclerView.adapter = adapter
 
-        val addButton = Button(requireContext()).apply {
+        val addButton = Button(context).apply {
             text = "Add Income"
             textSize = 16f
             setTextColor(white)
             background = GradientDrawable().apply {
                 cornerRadius = 48f
-                setColor(green)
+                setColor(purple)
             }
             setPadding(40, 30, 40, 30)
             layoutParams = FrameLayout.LayoutParams(
@@ -76,15 +78,185 @@ class IncomeFragment : Fragment() {
         root.addView(recyclerView)
         root.addView(addButton)
 
+        return root
+    }
+
+
+    @SuppressLint("SetTextI18n")
+    private fun buildPhoneLandscapeLayout(): View {
+        val context = requireContext()
+        val root = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor(yellow)
+            setPadding(32, 32, 32, 32)
+        }
+
+        val recyclerView = RecyclerView(context).apply {
+            layoutManager = LinearLayoutManager(context)
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
+                marginEnd = 16
+            }
+        }
+        adapter = TransactionAdapter(mutableListOf()) {
+            viewModel.delete(it)
+        }
+        recyclerView.adapter = adapter
+
+        val addButton = Button(context).apply {
+            text = "Add Income"
+            textSize = 16f
+            setTextColor(white)
+            background = GradientDrawable().apply {
+                cornerRadius = 48f
+                setColor(purple)
+            }
+            setPadding(40, 30, 40, 30)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setOnClickListener { showAddDialog() }
+        }
+
+        val buttonContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            addView(addButton)
+        }
+
+        root.addView(recyclerView)
+        root.addView(buttonContainer)
+
+        return root
+    }
+
+
+    @SuppressLint("SetTextI18n")
+    private fun buildTabletPortraitLayout(): View {
+        val context = requireContext()
+        val root = FrameLayout(context).apply {
+            setBackgroundColor(yellow)
+            setPadding(64, 64, 64, 64)
+        }
+
+        val recyclerView = RecyclerView(context).apply {
+            layoutManager = LinearLayoutManager(context)
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            ).apply {
+                setMargins(0, 0, 0, 300)
+            }
+        }
+        adapter = TransactionAdapter(mutableListOf()) {
+            viewModel.delete(it)
+        }
+        recyclerView.adapter = adapter
+
+        val addButton = Button(context).apply {
+            text = "Add Income"
+            textSize = 20f // bigger font
+            setTextColor(white)
+            background = GradientDrawable().apply {
+                cornerRadius = 64f
+                setColor(purple)
+            }
+            setPadding(60, 40, 60, 40)
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM
+            ).apply {
+                setMargins(128, 32, 128, 128)
+            }
+            setOnClickListener { showAddDialog() }
+        }
+
+        root.addView(recyclerView)
+        root.addView(addButton)
+
+        return root
+    }
+
+
+    @SuppressLint("SetTextI18n")
+    private fun buildTabletLandscapeLayout(): View {
+        val context = requireContext()
+        val root = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor(yellow)
+            setPadding(64, 64, 64, 64)
+        }
+
+        val recyclerView = RecyclerView(context).apply {
+            layoutManager = LinearLayoutManager(context)
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 7f).apply {
+                marginEnd = 32
+            }
+        }
+        adapter = TransactionAdapter(mutableListOf()) {
+            viewModel.delete(it)
+        }
+        recyclerView.adapter = adapter
+
+        val buttonContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 3f)
+        }
+
+        val addButton = Button(context).apply {
+            text = "Add Income"
+            textSize = 22f
+            setTextColor(white)
+            background = GradientDrawable().apply {
+                cornerRadius = 64f
+                setColor(purple)
+            }
+            setPadding(80, 50, 80, 50)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setOnClickListener { showAddDialog() }
+        }
+
+        buttonContainer.addView(addButton)
+        root.addView(recyclerView)
+        root.addView(buttonContainer)
+
+        return root
+    }
+
+
+
+    @SuppressLint("SetTextI18n")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         viewModel = ViewModelProvider(this)[TransactionViewModel::class.java]
         viewModel.getTransactions("income").observe(viewLifecycleOwner) {
             adapter.update(it)
         }
-
-        setupSwipeToDelete(recyclerView)
-
-        return root
     }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val isTablet = resources.configuration.smallestScreenWidthDp >= 600
+        val orientation = resources.configuration.orientation
+        val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        return when {
+            isTablet && isLandscape -> buildTabletLandscapeLayout()
+            isTablet && !isLandscape -> buildTabletPortraitLayout()
+            !isTablet && isLandscape -> buildPhoneLandscapeLayout()
+            else -> buildPhonePortraitLayout()
+        }
+    }
+
 
     private fun setupSwipeToDelete(recyclerView: RecyclerView) {
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -114,7 +286,7 @@ class IncomeFragment : Fragment() {
             setPadding(32, 24, 32, 24)
             background = GradientDrawable().apply {
                 cornerRadius = 24f
-                setStroke(2, green)
+                setStroke(2, purple)
                 setColor(white)
             }
         }
@@ -162,7 +334,7 @@ class IncomeFragment : Fragment() {
             this.adapter = adapter
             background = GradientDrawable().apply {
                 cornerRadius = 24f
-                setStroke(2, green)
+                setStroke(2, purple)
                 setColor(white)
             }
             setPadding(24, 24, 24, 24)

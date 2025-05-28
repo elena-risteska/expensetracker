@@ -2,6 +2,7 @@ package com.example.expensetracker
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -14,11 +15,8 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.Spinner
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -32,21 +30,19 @@ class ExpenseFragment : Fragment() {
     private lateinit var adapter: TransactionAdapter
 
     private val purple = "#9C27B0".toColorInt()
+    private val white = Color.WHITE
     private val yellow = "#FFF176".toColorInt()
 
     @SuppressLint("SetTextI18n")
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val root = FrameLayout(requireContext()).apply {
-            background = GradientDrawable().apply {
-                cornerRadius = 48f
-                setColor(yellow)
-            }
+    private fun buildPhonePortraitLayout(): View {
+        val context = requireContext()
+        val root = FrameLayout(context).apply {
+            setBackgroundColor(yellow)
+            setPadding(0, 32, 0, 0)
         }
 
-        val recyclerView = RecyclerView(requireContext()).apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            setPadding(0, 40, 0, 0)
-            clipToPadding = false
+        val recyclerView = RecyclerView(context).apply {
+            layoutManager = LinearLayoutManager(context)
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
@@ -58,13 +54,13 @@ class ExpenseFragment : Fragment() {
         adapter = TransactionAdapter(mutableListOf()) {
             viewModel.delete(it)
         }
-
         recyclerView.adapter = adapter
+        setupSwipeToDelete(recyclerView)
 
-        val addButton = Button(requireContext()).apply {
+        val addButton = Button(context).apply {
             text = "Add Expense"
             textSize = 16f
-            setTextColor(Color.WHITE)
+            setTextColor(white)
             background = GradientDrawable().apply {
                 cornerRadius = 48f
                 setColor(purple)
@@ -83,14 +79,181 @@ class ExpenseFragment : Fragment() {
         root.addView(recyclerView)
         root.addView(addButton)
 
+        return root
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun buildPhoneLandscapeLayout(): View {
+        val context = requireContext()
+        val root = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor(yellow)
+            setPadding(32, 32, 32, 32)
+        }
+
+        val recyclerView = RecyclerView(context).apply {
+            layoutManager = LinearLayoutManager(context)
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
+                marginEnd = 16
+            }
+        }
+        adapter = TransactionAdapter(mutableListOf()) {
+            viewModel.delete(it)
+        }
+        recyclerView.adapter = adapter
+        setupSwipeToDelete(recyclerView)
+
+        val addButton = Button(context).apply {
+            text = "Add Expense"
+            textSize = 16f
+            setTextColor(white)
+            background = GradientDrawable().apply {
+                cornerRadius = 48f
+                setColor(purple)
+            }
+            setPadding(40, 30, 40, 30)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setOnClickListener { showAddDialog() }
+        }
+
+        val buttonContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            addView(addButton)
+        }
+
+        root.addView(recyclerView)
+        root.addView(buttonContainer)
+
+        return root
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun buildTabletPortraitLayout(): View {
+        val context = requireContext()
+        val root = FrameLayout(context).apply {
+            setBackgroundColor(yellow)
+            setPadding(64, 64, 64, 64)
+        }
+
+        val recyclerView = RecyclerView(context).apply {
+            layoutManager = LinearLayoutManager(context)
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            ).apply {
+                setMargins(0, 0, 0, 300)
+            }
+        }
+        adapter = TransactionAdapter(mutableListOf()) {
+            viewModel.delete(it)
+        }
+        recyclerView.adapter = adapter
+        setupSwipeToDelete(recyclerView)
+
+        val addButton = Button(context).apply {
+            text = "Add Expense"
+            textSize = 20f // bigger font
+            setTextColor(white)
+            background = GradientDrawable().apply {
+                cornerRadius = 64f
+                setColor(purple)
+            }
+            setPadding(60, 40, 60, 40)
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM
+            ).apply {
+                setMargins(128, 32, 128, 128)
+            }
+            setOnClickListener { showAddDialog() }
+        }
+
+        root.addView(recyclerView)
+        root.addView(addButton)
+
+        return root
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun buildTabletLandscapeLayout(): View {
+        val context = requireContext()
+        val root = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor(yellow)
+            setPadding(64, 64, 64, 64)
+        }
+
+        val recyclerView = RecyclerView(context).apply {
+            layoutManager = LinearLayoutManager(context)
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 7f).apply {
+                marginEnd = 32
+            }
+        }
+        adapter = TransactionAdapter(mutableListOf()) {
+            viewModel.delete(it)
+        }
+        recyclerView.adapter = adapter
+        setupSwipeToDelete(recyclerView)
+
+        val buttonContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 3f)
+        }
+
+        val addButton = Button(context).apply {
+            text = "Add Expense"
+            textSize = 22f
+            setTextColor(white)
+            background = GradientDrawable().apply {
+                cornerRadius = 64f
+                setColor(purple)
+            }
+            setPadding(80, 50, 80, 50)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setOnClickListener { showAddDialog() }
+        }
+
+        buttonContainer.addView(addButton)
+        root.addView(recyclerView)
+        root.addView(buttonContainer)
+
+        return root
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val isTablet = resources.configuration.smallestScreenWidthDp >= 600
+        val orientation = resources.configuration.orientation
+        val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        return when {
+            isTablet && isLandscape -> buildTabletLandscapeLayout()
+            isTablet && !isLandscape -> buildTabletPortraitLayout()
+            !isTablet && isLandscape -> buildPhoneLandscapeLayout()
+            else -> buildPhonePortraitLayout()
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         viewModel = ViewModelProvider(this)[TransactionViewModel::class.java]
         viewModel.getTransactions("expense").observe(viewLifecycleOwner) {
             adapter.update(it)
         }
-
-        setupSwipeToDelete(recyclerView)
-
-        return root
     }
 
     private fun setupSwipeToDelete(recyclerView: RecyclerView) {
@@ -112,7 +275,7 @@ class ExpenseFragment : Fragment() {
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(48, 32, 48, 16)
-            setBackgroundColor(Color.WHITE) // inner content white
+            setBackgroundColor(white)
         }
 
         val inputAmount = EditText(context).apply {
@@ -122,17 +285,19 @@ class ExpenseFragment : Fragment() {
             background = GradientDrawable().apply {
                 cornerRadius = 24f
                 setStroke(2, purple)
-                setColor(Color.WHITE)
+                setColor(white)
             }
         }
         container.addView(inputAmount, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = 32 })
+        ).apply {
+            bottomMargin = 32
+        })
 
-        val categories = listOf("Category", "Food", "Transport", "Shopping", "Bills", "Entertainment", "Other")
+        val categories = listOf("Category", "Food", "Transport", "Entertainment", "Other")
 
-        val spinnerAdapter = object : ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, categories) {
+        val adapter = object : ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, categories) {
             override fun isEnabled(position: Int): Boolean {
                 return position != 0
             }
@@ -148,50 +313,41 @@ class ExpenseFragment : Fragment() {
                 return view
             }
         }
-        val spinnerContainer = RelativeLayout(context).apply {
+
+        val spinnerContainer = FrameLayout(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-        val spinner = Spinner(context).apply {
-            id = View.generateViewId()
-            adapter = spinnerAdapter
-            setSelection(0)
-            background = GradientDrawable().apply {
-                cornerRadius = 24f
-                setStroke(2, purple)
-                setColor(Color.WHITE)
-            }
-            setPadding(24, 24, 64, 24)
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_START)
-                addRule(RelativeLayout.CENTER_VERTICAL)
-            }
-        }
-        val chevron = ImageView(context).apply {
-            setImageDrawable(AppCompatResources.getDrawable(context, android.R.drawable.arrow_down_float))
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_END)
-                addRule(RelativeLayout.CENTER_VERTICAL)
-                marginEnd = 50
+                bottomMargin = 24
             }
         }
 
+        val spinner = Spinner(context).apply {
+            this.adapter = adapter
+            background = GradientDrawable().apply {
+                cornerRadius = 24f
+                setStroke(2, purple)
+                setColor(white)
+            }
+            setPadding(24, 24, 24, 24)
+            setSelection(0)
+        }
+
         spinnerContainer.addView(spinner)
+
+        val chevron = android.widget.ImageView(context).apply {
+            setImageResource(android.R.drawable.arrow_down_float)
+            val size = 48
+            layoutParams = FrameLayout.LayoutParams(size, size, Gravity.END or Gravity.CENTER_VERTICAL).apply {
+                marginEnd = 24
+            }
+            isClickable = false
+            isFocusable = false
+        }
         spinnerContainer.addView(chevron)
-        container.addView(spinnerContainer, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            bottomMargin = 24
-        })
+
+        container.addView(spinnerContainer)
 
         val dialog = AlertDialog.Builder(context)
             .setView(container)
@@ -199,7 +355,7 @@ class ExpenseFragment : Fragment() {
             .setPositiveButton("Add") { _, _ ->
                 val amount = inputAmount.text.toString().toDoubleOrNull()
                 val category = spinner.selectedItem as String
-                if (amount != null) {
+                if (amount != null && spinner.selectedItemPosition != 0) {
                     viewModel.insert(
                         TransactionEntity(
                             amount = amount,
@@ -221,6 +377,4 @@ class ExpenseFragment : Fragment() {
 
         dialog.show()
     }
-
-
 }
