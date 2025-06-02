@@ -17,11 +17,16 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
+
 
 class LoginActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.onAttach(newBase))
     }
@@ -44,6 +49,15 @@ class LoginActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
+        auth = FirebaseAuth.getInstance()
+        val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val isLoggedIn = prefs.getBoolean("isLoggedIn", false)
+
+        if (auth.currentUser != null && isLoggedIn) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+
         super.onCreate(savedInstanceState)
 
         val backgroundColor = "#FFF176".toColorInt()
@@ -196,11 +210,22 @@ class LoginActivity : AppCompatActivity() {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, getString(R.string.fill), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, getString(R.string.successful), Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                            prefs.edit { putBoolean("isLoggedIn", true) }
+
+                            Toast.makeText(this, getString(R.string.successful), Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(this, MainActivity::class.java))
+                            finish()
+                        } else {
+                            Toast.makeText(this, task.exception?.localizedMessage ?: "Login failed", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
         }
+
 
         registerLink.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))

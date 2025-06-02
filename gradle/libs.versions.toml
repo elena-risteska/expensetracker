@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.0"
+agp = "8.10.1"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -14,7 +14,17 @@ room = "2.7.1"
 mpandroidchart = "v3.1.0"
 
 [libraries]
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.14.0" }
 
+firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebase-auth = { module = "com.google.firebase:firebase-auth-ktx" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore-ktx" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
+
+google-auth = { module = "com.google.android.gms:play-services-auth", version = "21.3.0" }
+facebook-login = { module = "com.facebook.android:facebook-login", version = "18.0.3" }
+
+multidex = { module = "androidx.multidex:multidex", version = "2.0.1" }
 androidx-core-ktx              = { group = "androidx.core",      name = "core-ktx",           version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -41,3 +51,4 @@ recyclerview = "androidx.recyclerview:recyclerview:1.4.0"
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.2" }

@@ -20,6 +20,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.userProfileChangeRequest
+
 
 class RegisterActivity : AppCompatActivity() {
     override fun attachBaseContext(newBase: Context) {
@@ -40,9 +43,12 @@ class RegisterActivity : AppCompatActivity() {
     private fun isLandscape(): Boolean {
         return resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
     }
+    private lateinit var auth: FirebaseAuth
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
+        auth = FirebaseAuth.getInstance()
+
         super.onCreate(savedInstanceState)
 
         val backgroundColor = "#FFF176".toColorInt()
@@ -191,15 +197,34 @@ class RegisterActivity : AppCompatActivity() {
             val name = nameInput.editText?.text.toString().trim()
             val email = emailInput.editText?.text.toString().trim()
             val password = passwordInput.editText?.text.toString().trim()
+            if (password.length < 6) {
+                Toast.makeText(this, getString(R.string.password_short), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, getString(R.string.fill), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, getString(R.string.successful), Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, LoginActivity::class.java))
-                finish()
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // Optional: Set display name
+                            val user = auth.currentUser
+                            val profileUpdates = userProfileChangeRequest {
+                                displayName = name
+                            }
+                            user?.updateProfile(profileUpdates)
+
+                            Toast.makeText(this, getString(R.string.successful), Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(this, LoginActivity::class.java))
+                            finish()
+                        } else {
+                            Toast.makeText(this, task.exception?.localizedMessage ?: "Registration failed", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
         }
+
 
         loginLink.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))

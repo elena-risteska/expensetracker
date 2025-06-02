@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -33,6 +34,7 @@ class DashboardFragment : Fragment() {
 
     private var currentIncome = 0.0
     private var currentExpense = 0.0
+
 
     override fun onCreateView(
         inflater: android.view.LayoutInflater,
@@ -69,13 +71,43 @@ class DashboardFragment : Fragment() {
             )
         }
 
-        // Flag row
+        // Top bar: horizontal layout with Logout button (left) and flags (right)
+        val topBar = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            gravity = Gravity.CENTER_VERTICAL
+        }
+
+        // Logout button (TextView styled like a button)
+        val logoutButton = TextView(context).apply {
+            text = getString(R.string.logout) // Add "logout" string to strings.xml
+            setTextColor(Color.WHITE)
+            setTypeface(null, Typeface.BOLD)
+            setPadding(20, 10, 20, 10)
+            background = GradientDrawable().apply {
+                setColor("#D32F2F".toColorInt()) // Red background
+                cornerRadius = 24f
+            }
+            setOnClickListener {
+                performLogout()
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        // Flags row aligned to the right
         val flagRow = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.END
             layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f // take the remaining space
             )
         }
 
@@ -99,7 +131,12 @@ class DashboardFragment : Fragment() {
 
         flagRow.addView(macedonianFlag)
         flagRow.addView(englishFlag)
-        root.addView(flagRow)
+
+        // Add Logout button and flags to the top bar
+        topBar.addView(logoutButton)
+        topBar.addView(flagRow)
+
+        root.addView(topBar)
 
         // Bubble TextViews
         incomeText = createRoundedBubbleTextView("#9C27B0")
@@ -130,6 +167,19 @@ class DashboardFragment : Fragment() {
         return root
     }
 
+    @SuppressLint("RestrictedApi", "CommitPrefEdits")
+    private fun performLogout() {
+        val sharedPref = requireActivity().getSharedPreferences("user_prefs", 0)
+        sharedPref.edit() {
+            clear() // clear all saved data
+        }
+
+        val intent = android.content.Intent(requireContext(), LoginActivity::class.java)
+        intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+
+        requireActivity().finish()
+    }
 
     @SuppressLint("SetTextI18n")
     private fun buildPhoneLandscapeLayout(): View {
