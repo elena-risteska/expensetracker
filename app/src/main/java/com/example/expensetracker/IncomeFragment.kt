@@ -57,7 +57,7 @@ class IncomeFragment : Fragment() {
         recyclerView.adapter = adapter
 
         val addButton = Button(context).apply {
-            text = "Add Income"
+            text = getString(R.string.add_income)
             textSize = 16f
             setTextColor(white)
             background = GradientDrawable().apply {
@@ -103,7 +103,7 @@ class IncomeFragment : Fragment() {
         recyclerView.adapter = adapter
 
         val addButton = Button(context).apply {
-            text = "Add Income"
+            text = getString(R.string.add_income)
             textSize = 16f
             setTextColor(white)
             background = GradientDrawable().apply {
@@ -158,7 +158,7 @@ class IncomeFragment : Fragment() {
         recyclerView.adapter = adapter
 
         val addButton = Button(context).apply {
-            text = "Add Income"
+            text = getString(R.string.add_income)
             textSize = 20f // bigger font
             setTextColor(white)
             background = GradientDrawable().apply {
@@ -210,7 +210,7 @@ class IncomeFragment : Fragment() {
         }
 
         val addButton = Button(context).apply {
-            text = "Add Income"
+            text = getString(R.string.add_income)
             textSize = 22f
             setTextColor(white)
             background = GradientDrawable().apply {
@@ -281,7 +281,7 @@ class IncomeFragment : Fragment() {
         }
 
         val inputAmount = EditText(context).apply {
-            hint = "Amount"
+            hint = getString(R.string.amount)
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             setPadding(32, 24, 32, 24)
             background = GradientDrawable().apply {
@@ -297,7 +297,12 @@ class IncomeFragment : Fragment() {
             bottomMargin = 32
         })
 
-        val categories = listOf("Category", "Salary", "Bonus", "Other")
+        val categories = listOf(
+            getString(R.string.category),
+            getString(R.string.salary),
+            getString(R.string.bonus),
+            getString(R.string.other)
+        )
 
         // Create a custom adapter with disabled first item and grayed text
         val adapter = object : ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, categories) {
@@ -360,8 +365,8 @@ class IncomeFragment : Fragment() {
 
         val dialog = AlertDialog.Builder(context)
             .setView(container)
-            .setTitle("New Income")
-            .setPositiveButton("Add") { _, _ ->
+            .setTitle(getString(R.string.new_income))
+            .setPositiveButton(getString(R.string.add)) { _, _ ->
                 val amount = inputAmount.text.toString().toDoubleOrNull()
                 val category = spinner.selectedItem as String
                 // Ignore if first item is selected
@@ -375,7 +380,7 @@ class IncomeFragment : Fragment() {
                     )
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .create()
 
         dialog.window?.setBackgroundDrawable(

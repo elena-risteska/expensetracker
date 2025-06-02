@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.graphics.toColorInt
@@ -50,6 +51,11 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    private fun changeLanguage(language: String) {
+        val updatedContext = LocaleHelper.setLocale(requireContext(), language)
+        activity?.recreate() // Restart activity to apply changes
+    }
+
     @SuppressLint("SetTextI18n")
     private fun buildPhonePortraitLayout(): View {
         val context = requireContext()
@@ -63,6 +69,39 @@ class DashboardFragment : Fragment() {
             )
         }
 
+        // Flag row
+        val flagRow = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.END
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val macedonianFlag = ImageView(context).apply {
+            setImageResource(R.drawable.ic_flag_mk)
+            layoutParams = LinearLayout.LayoutParams(96, 96).apply {
+                marginEnd = 16
+            }
+            setOnClickListener {
+                changeLanguage("mk")
+            }
+        }
+
+        val englishFlag = ImageView(context).apply {
+            setImageResource(R.drawable.ic_flag_en)
+            layoutParams = LinearLayout.LayoutParams(96, 96)
+            setOnClickListener {
+                changeLanguage("en")
+            }
+        }
+
+        flagRow.addView(macedonianFlag)
+        flagRow.addView(englishFlag)
+        root.addView(flagRow)
+
+        // Bubble TextViews
         incomeText = createRoundedBubbleTextView("#9C27B0")
         expenseText = createRoundedBubbleTextView("#9C27B0")
         balanceText = createRoundedBubbleTextView("#9C27B0")
@@ -71,7 +110,7 @@ class DashboardFragment : Fragment() {
         root.addView(expenseText)
         root.addView(balanceText)
 
-        // Spacer to push pie chart down
+        // Spacer
         val spacer = View(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -82,7 +121,7 @@ class DashboardFragment : Fragment() {
         root.addView(spacer)
 
         pieChart = createPieChart(ViewGroup.LayoutParams.MATCH_PARENT).apply {
-            layoutParams.height = 800 // taller pie chart
+            layoutParams.height = 800
         }
         root.addView(pieChart)
 
@@ -90,6 +129,7 @@ class DashboardFragment : Fragment() {
 
         return root
     }
+
 
     @SuppressLint("SetTextI18n")
     private fun buildPhoneLandscapeLayout(): View {
@@ -226,7 +266,7 @@ class DashboardFragment : Fragment() {
             isDrawHoleEnabled = true
             setHoleColor(Color.TRANSPARENT)
             setTransparentCircleAlpha(110)
-            centerText = "Spending Overview"
+            centerText = getString(R.string.overview)
             setCenterTextSize(18f)
             legend.orientation = Legend.LegendOrientation.HORIZONTAL
             legend.horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
@@ -249,10 +289,11 @@ class DashboardFragment : Fragment() {
         income?.let { currentIncome = it }
         expense?.let { currentExpense = it }
 
-        incomeText.text = "Total Income: ${"%.2f".format(currentIncome)} ден."
-        expenseText.text = "Total Expenses: ${"%.2f".format(currentExpense)} ден."
+        incomeText.text = getString(R.string.total_income) + ": ${"%.2f".format(currentIncome)} ден."
+        expenseText.text = getString(R.string.total_expense) + ": ${"%.2f".format(currentExpense)} ден."
         val balance = currentIncome - currentExpense
-        balanceText.text = "Balance: ${"%.2f".format(balance)} ден."
+        balanceText.text = getString(R.string.balance) + ": ${"%.2f".format(balance)} ден."
+
 
         updatePieChart()
     }
@@ -265,9 +306,8 @@ class DashboardFragment : Fragment() {
         }
 
         val entries = mutableListOf<PieEntry>()
-        if (currentIncome > 0) entries.add(PieEntry(currentIncome.toFloat(), "Income"))
-        if (currentExpense > 0) entries.add(PieEntry(currentExpense.toFloat(), "Expense"))
-
+        if (currentIncome > 0) entries.add(PieEntry(currentIncome.toFloat(), getString(R.string.income)))
+        if (currentExpense > 0) entries.add(PieEntry(currentExpense.toFloat(), getString(R.string.expense)))
         val dataSet = PieDataSet(entries, "").apply {
             colors = listOf(
                 "#7B1FA2".toColorInt(), // Purple

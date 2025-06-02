@@ -1,5 +1,6 @@
 package com.example.expensetracker
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -18,15 +19,17 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var fragmentContainer: FrameLayout
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Set status bar color to match background
         window.statusBarColor = "#FFF176".toColorInt()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
 
-        // Root layout with yellow background
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor("#FFF176".toColorInt())
@@ -37,7 +40,6 @@ class MainActivity : AppCompatActivity() {
             setPadding(0, 64, 0, 70)
         }
 
-        // Fragment container (fills remaining space)
         fragmentContainer = FrameLayout(this).apply {
             id = View.generateViewId()
             layoutParams = LinearLayout.LayoutParams(
@@ -49,7 +51,6 @@ class MainActivity : AppCompatActivity() {
 
         rootLayout.addView(fragmentContainer)
 
-        // Bottom Navigation
         val bottomNav = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -77,19 +78,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        bottomNav.addView(navButton("Dashboard") {
+        bottomNav.addView(navButton(getString(R.string.dashboard)) {
             supportFragmentManager.beginTransaction()
                 .replace(fragmentContainer.id, DashboardFragment())
                 .commit()
         })
 
-        bottomNav.addView(navButton("Expenses") {
+        bottomNav.addView(navButton(getString(R.string.expense)) {
             supportFragmentManager.beginTransaction()
                 .replace(fragmentContainer.id, ExpenseFragment())
                 .commit()
         })
 
-        bottomNav.addView(navButton("Income") {
+        bottomNav.addView(navButton(getString(R.string.income)) {
             supportFragmentManager.beginTransaction()
                 .replace(fragmentContainer.id, IncomeFragment())
                 .commit()
@@ -98,7 +99,6 @@ class MainActivity : AppCompatActivity() {
         rootLayout.addView(bottomNav)
         setContentView(rootLayout)
 
-        // Load default fragment
         supportFragmentManager.beginTransaction()
             .replace(fragmentContainer.id, DashboardFragment())
             .commit()

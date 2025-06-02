@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Буџетко</string>
+    <string name="welcome">Добредојде</string>
+    <string name="fill">Ве молиме пополнете ги сите полиња</string>
+    <string name="login">Најава</string>
+    <string name="successful">Успешна најава</string>
+    <string name="logout">Одјава</string>
+    <string name="register">Регистрација</string>
+    <string name="username">Корисничко име</string>
+    <string name="email">Е-пошта</string>
+    <string name="password">Лозинка</string>
+    <string name="no_account">Немаш сметка? Регистрирај се</string>
+    <string name="account">Имаш сметка? Најави се</string>
+    <string name="total_income">Вкупно приходи</string>
+    <string name="total_expense">Вкупно трошоци</string>
+    <string name="balance">Баланс</string>
+    <string name="expense">Трошоци</string>
+    <string name="income">Приходи</string>
+    <string name="dashboard">Дома</string>
+    <string name="overview">Преглед</string>
+    <string name="bills">Сметки</string>
+    <string name="transport">Транспорт</string>
+    <string name="category">Категорија</string>
+    <string name="entertainment">Забава</string>
+    <string name="other">Друго</string>
+    <string name="add">Додај</string>
+    <string name="cancel">Откажи</string>
+    <string name="amount">Износ</string>
+    <string name="food">Храна</string>
+    <string name="new_expense">Нов трошок</string>
+    <string name="add_expense">Додај трошок</string>
+    <string name="new_income">Нов приход</string>
+    <string name="add_income">Додај приход</string>
+    <string name="salary">Плата</string>
+    <string name="bonus">Бонус</string>
+
+</resources>

@@ -58,7 +58,7 @@ class ExpenseFragment : Fragment() {
         setupSwipeToDelete(recyclerView)
 
         val addButton = Button(context).apply {
-            text = "Add Expense"
+            text = getString(R.string.add_expense)
             textSize = 16f
             setTextColor(white)
             background = GradientDrawable().apply {
@@ -104,7 +104,7 @@ class ExpenseFragment : Fragment() {
         setupSwipeToDelete(recyclerView)
 
         val addButton = Button(context).apply {
-            text = "Add Expense"
+            text = getString(R.string.add_expense)
             textSize = 16f
             setTextColor(white)
             background = GradientDrawable().apply {
@@ -159,7 +159,7 @@ class ExpenseFragment : Fragment() {
         setupSwipeToDelete(recyclerView)
 
         val addButton = Button(context).apply {
-            text = "Add Expense"
+            text = getString(R.string.add_expense)
             textSize = 20f // bigger font
             setTextColor(white)
             background = GradientDrawable().apply {
@@ -211,7 +211,7 @@ class ExpenseFragment : Fragment() {
         }
 
         val addButton = Button(context).apply {
-            text = "Add Expense"
+            text = getString(R.string.add_expense)
             textSize = 22f
             setTextColor(white)
             background = GradientDrawable().apply {
@@ -279,7 +279,7 @@ class ExpenseFragment : Fragment() {
         }
 
         val inputAmount = EditText(context).apply {
-            hint = "Amount"
+            hint = getString(R.string.amount)
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             setPadding(32, 24, 32, 24)
             background = GradientDrawable().apply {
@@ -295,7 +295,13 @@ class ExpenseFragment : Fragment() {
             bottomMargin = 32
         })
 
-        val categories = listOf("Category", "Food", "Transport", "Entertainment", "Other")
+        val categories = listOf(
+            getString(R.string.category),
+            getString(R.string.food),
+            getString(R.string.transport),
+            getString(R.string.entertainment),
+            getString(R.string.other)
+        )
 
         val adapter = object : ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, categories) {
             override fun isEnabled(position: Int): Boolean {
@@ -351,8 +357,8 @@ class ExpenseFragment : Fragment() {
 
         val dialog = AlertDialog.Builder(context)
             .setView(container)
-            .setTitle("New Expense")
-            .setPositiveButton("Add") { _, _ ->
+            .setTitle(getString(R.string.new_expense))
+            .setPositiveButton(getString(R.string.add)) { _, _ ->
                 val amount = inputAmount.text.toString().toDoubleOrNull()
                 val category = spinner.selectedItem as String
                 if (amount != null && spinner.selectedItemPosition != 0) {
@@ -365,7 +371,7 @@ class ExpenseFragment : Fragment() {
                     )
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.cancel),null)
             .create()
 
         dialog.window?.setBackgroundDrawable(
