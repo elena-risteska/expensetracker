@@ -71,7 +71,6 @@ class DashboardFragment : Fragment() {
             )
         }
 
-        // Top bar: horizontal layout with Logout button (left) and flags (right)
         val topBar = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
@@ -81,14 +80,13 @@ class DashboardFragment : Fragment() {
             gravity = Gravity.CENTER_VERTICAL
         }
 
-        // Logout button (TextView styled like a button)
         val logoutButton = TextView(context).apply {
-            text = getString(R.string.logout) // Add "logout" string to strings.xml
+            text = getString(R.string.logout)
             setTextColor(Color.WHITE)
             setTypeface(null, Typeface.BOLD)
             setPadding(20, 10, 20, 10)
             background = GradientDrawable().apply {
-                setColor("#D32F2F".toColorInt()) // Red background
+                setColor("#7E57C2".toColorInt())
                 cornerRadius = 24f
             }
             setOnClickListener {

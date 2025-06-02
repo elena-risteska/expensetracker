@@ -168,6 +168,25 @@ class LoginActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             setPadding(0, 40, 0, 0)
         }
+        val guestButton = Button(this).apply {
+            text = getString(R.string.guest)
+            setTextColor(Color.WHITE)
+            textSize = 16f
+            setPadding(40, 30, 40, 30)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 48f
+                setColor("#7E57C2".toColorInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 32
+            }
+        }
+
+
 
         if (isTablet() && isLandscape()) {
             val leftPanel = LinearLayout(this).apply {
@@ -183,8 +202,9 @@ class LoginActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                 addView(loginButton)
                 addView(registerLink)
-            }
 
+            }
+            rightPanel.addView(guestButton)
             loginLayout.addView(leftPanel)
             loginLayout.addView(rightPanel)
         } else {
@@ -193,6 +213,7 @@ class LoginActivity : AppCompatActivity() {
             loginLayout.addView(passwordInput)
             loginLayout.addView(loginButton)
             loginLayout.addView(registerLink)
+            loginLayout.addView(guestButton)
         }
 
 
@@ -231,5 +252,21 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, RegisterActivity::class.java))
             finish()
         }
+        guestButton.setOnClickListener {
+            auth.signInAnonymously()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                        prefs.edit { putBoolean("isLoggedIn", true) }
+
+                        Toast.makeText(this, getString(R.string.anonymous), Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    } else {
+                        Toast.makeText(this, task.exception?.localizedMessage ?: "Anonymous login failed", Toast.LENGTH_SHORT).show()
+                    }
+                }
+        }
+
     }
 }

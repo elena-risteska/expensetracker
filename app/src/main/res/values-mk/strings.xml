@@ -10,6 +10,8 @@
     <string name="email">Е-пошта</string>
     <string name="password">Лозинка</string>
     <string name="password_short">Лозинката е прекратка</string>
+    <string name="anonymous">Се најавивте анонимно</string>
+    <string name="guest">Гостин</string>
     <string name="no_account">Немаш сметка? Регистрирај се</string>
     <string name="account">Имаш сметка? Најави се</string>
     <string name="total_income">Вкупно приходи</string>

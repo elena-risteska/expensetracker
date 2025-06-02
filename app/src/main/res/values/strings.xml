@@ -9,6 +9,8 @@
     <string name="email">Email</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="guest">Guest</string>
+    <string name="anonymous">Logged in anonymously</string>
     <string name="password_short">Password too short</string>
     <string name="no_account">Don\'t have an account? Register</string>
     <string name="account">Already have an account? Login</string>
