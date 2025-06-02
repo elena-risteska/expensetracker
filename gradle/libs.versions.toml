@@ -20,8 +20,7 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-auth = { module = "com.google.firebase:firebase-auth-ktx" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore-ktx" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
-
-google-auth = { module = "com.google.android.gms:play-services-auth", version = "21.3.0" }
+google-auth = { module = "com.google.android.gms:play-services-auth", version = "21.0.0" }
 facebook-login = { module = "com.facebook.android:facebook-login", version = "18.0.3" }
 
 multidex = { module = "androidx.multidex:multidex", version = "2.0.1" }

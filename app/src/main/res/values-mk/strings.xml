@@ -6,12 +6,15 @@
     <string name="successful">Успешна најава</string>
     <string name="logout">Одјава</string>
     <string name="register">Регистрација</string>
+    <string name="facebook">Најава со Facebook</string>
+    <string name="google">Најава со Google</string>
     <string name="username">Корисничко име</string>
     <string name="email">Е-пошта</string>
     <string name="password">Лозинка</string>
     <string name="password_short">Лозинката е прекратка</string>
     <string name="anonymous">Се најавивте анонимно</string>
     <string name="guest">Гостин</string>
+    <string name="default_web_client_id">281157317761-10ehehn9mm7bimloroe8ljbm2mrhau8q.apps.googleusercontent.com</string>
     <string name="no_account">Немаш сметка? Регистрирај се</string>
     <string name="account">Имаш сметка? Најави се</string>
     <string name="total_income">Вкупно приходи</string>

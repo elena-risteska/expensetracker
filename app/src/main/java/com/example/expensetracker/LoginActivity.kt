@@ -19,13 +19,22 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
+import com.facebook.login.LoginManager
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private val RC_SIGN_IN = 9001
+
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.onAttach(newBase))
@@ -46,9 +55,47 @@ class LoginActivity : AppCompatActivity() {
         return resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                    prefs.edit { putBoolean("isLoggedIn", true) }
+
+                    Toast.makeText(this, getString(R.string.successful), Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id)) // From google-services.json
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
         auth = FirebaseAuth.getInstance()
         val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         val isLoggedIn = prefs.getBoolean("isLoggedIn", false)
@@ -182,10 +229,56 @@ class LoginActivity : AppCompatActivity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                topMargin = 32
+                topMargin = 50
             }
         }
 
+        val googleButton = Button(this).apply {
+            text = getString(R.string.google)
+            setTextColor(Color.WHITE)
+            textSize = 16f
+            setPadding(40, 30, 40, 30)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 48f
+                setColor("#7E57C2".toColorInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 32
+            }
+
+            setOnClickListener {
+                val signInIntent = googleSignInClient.signInIntent
+                startActivityForResult(signInIntent, RC_SIGN_IN)
+            }
+        }
+        val fbButton = Button(this).apply {
+            text = getString(R.string.facebook)
+            setTextColor(Color.WHITE)
+            textSize = 16f
+            setPadding(40, 30, 40, 30)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = 48f
+                setColor("#7E57C2".toColorInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 32
+            }
+
+            setOnClickListener {
+                LoginManager.getInstance().logInWithReadPermissions(
+                    this@LoginActivity,
+                    listOf("email", "public_profile")
+                )
+            }
+        }
 
 
         if (isTablet() && isLandscape()) {
@@ -214,6 +307,9 @@ class LoginActivity : AppCompatActivity() {
             loginLayout.addView(loginButton)
             loginLayout.addView(registerLink)
             loginLayout.addView(guestButton)
+            loginLayout.addView(googleButton)
+            loginLayout.addView(fbButton)
+
         }
 
 
