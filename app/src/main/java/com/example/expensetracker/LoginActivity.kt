@@ -28,6 +28,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.messaging.FirebaseMessaging
 
 
 class LoginActivity : AppCompatActivity() {
@@ -321,6 +322,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Logic
         loginButton.setOnClickListener {
+            FirebaseMessaging.getInstance().getToken()
             val email = emailInput.editText?.text.toString().trim()
             val password = passwordInput.editText?.text.toString().trim()
 
